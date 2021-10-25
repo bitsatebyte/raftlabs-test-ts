@@ -1,45 +1,38 @@
-import * as csv from 'fast-csv';
+import { Request, Response } from "express";
+import express from 'express';
+import { books, findByAuthorEmail, findItemByIsbn, magazines, sortByTitle, authors } from "./services";
 
-const parseCsv = (fileName: string): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    const data: any[] = [];
-    csv
-      .parseFile(`${fileName}.csv`, { headers: true })
-      .on('error', (error) => { 
-        console.error(error);
-        reject(error);
-      })
-      .on('data', (row: any) => {
-        data.push(row);
-      })
-      .on('end', () => {
-        resolve(data);
-      });
-  });
-}
+const app = express();
+const port = 3000;
 
-// prints to the console using console table
-// however, since books have a lot of data, the console output looks ugly
-(async () => {
-  let authors: any[], books: any[], magazines: any[];
-  try {
-    authors = await parseCsv('authors');
-  } catch (e) {
-    console.error(e);
-  }
-  try {
-    books = await parseCsv('books');
-  } catch (e) {
-    console.error(e);
-  }
-  try {
-    magazines = await parseCsv('magazines');
-  } catch (e) {
-    console.error(e);
-  }
+app.get('/authors', async (req: Request, res: Response) => {
+  res.send(authors);
+});
 
-  // print as tables
-  console.table(books);
-  console.table(authors);
-  console.table(magazines);
-})();
+app.get('/magazines', async (req: Request, res: Response) => {
+  res.send(magazines);
+});
+
+app.get('/magazines/:authorEmail', async (req: Request, res: Response) => {
+  res.send(findByAuthorEmail(req.params.authorEmail, magazines));
+});
+
+app.get('/books', async (req: Request, res: Response) => {
+  res.send(books);
+});
+
+app.get('/books/:isbn', async (req: Request, res: Response) => {
+  res.send(findItemByIsbn(req.params.isbn, books));
+});
+
+app.get('/books/author/:authorEmail', async (req: Request, res: Response) => {
+  res.send(findByAuthorEmail(req.params.authorEmail, books));
+});
+
+app.get('/sort', async (req: Request, res: Response) => {
+  res.send(sortByTitle(books, magazines));
+});
+
+app.listen(port, () => {
+  console.log(`Raftlabs app listening at http://localhost:${port}`);
+});
