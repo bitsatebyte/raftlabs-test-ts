@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import express from 'express';
+import cors from 'cors';
 import { books, findByAuthorEmail, findItemByIsbn, magazines, sortByTitle, authors } from "./services";
 
 const app = express();
+app.use(cors());
 const port = 3000;
 
 app.get('/authors', async (req: Request, res: Response) => {
